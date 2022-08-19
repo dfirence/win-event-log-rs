@@ -1,54 +1,70 @@
+use crate::query_list::Comparison;
 use std::fmt;
+use std::time::SystemTime;
 
 #[derive(Clone)]
-pub struct Time {
-    interval: String,
+pub struct TimeCreated {
+    time: String,
+    comparison: TimeComparison,
+    time_diff: TimeDiff,
 }
 
-impl Time {
-    pub fn new<T: Into<String>>(interval: T) -> Time
-    {
-        Time { interval: interval.into() }
+impl TimeCreated {
+    pub fn new(time: &str, comparison: TimeComparison, time_diff: TimeDiff) -> Self {
+        let time = match time_diff {
+            TimeDiff::InLast => format!("{}", time),
+            TimeDiff::InRange => format!("'{}'", time),
+        };
+        Self {
+            time,
+            comparison,
+            time_diff,
+        }
     }
 }
 
-impl fmt::Display for Time {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result
-    {
-        let s = format!("[System[TimeCreated[timediff(@SystemTime) &lt;= '{}'", self.interval);
-        write!(f, "{}", s)
-        //write!(f, "*[System[TimeCreated[@SystemTime] &gt;= '{}']]", self.time)
+impl fmt::Display for TimeCreated {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(
+            f,
+            "TimeCreated[{} {} {}]",
+            self.time_diff, self.comparison, self.time
+        )
     }
 }
-// ">*[System[TimeCreated[timediff(@SystemTime) &lt;= 3600000]]]</
-// https://docs.microsoft.com/en-us/previous-versions/bb671200(v=vs.90)
-/*
-"<QueryList>" & _
-"  <Query Id=""0"" Path=""Application"">" & _
-"    <Select Path=""Application"">" & _
-"        *[System[(Level &lt;= 3) and" & _
-"        TimeCreated[timediff(@SystemTime) &lt;= 86400000]]]" & _
-"    </Select>" & _
-"    <Suppress Path=""Application"">" & _
-"        *[System[(Level = 2)]]" & _
-"    </Suppress>" & _
-"    <Select Path=""System"">" & _
-"        *[System[(Level=1  or Level=2 or Level=3) and" & _
-"        TimeCreated[timediff(@SystemTime) &lt;= 86400000]]]" & _
-"    </Select>" & _
-"  </Query>" & _
-"</QueryList>"
-*/
-/*
-<QueryList>
-  <Query Id="0" Path="Security">
-    <Select Path="Security"> 
-        *[EventData[Data[@Name='SubjectUserName'] and (Data='test')]] 
-        and
-        *[System[TimeCreated[@SystemTime] &gt;= '2015-01-24T00:00:000Z']]
-        and
-        *[System[TimeCreated[@SystemTime] &lt;= '2015-01-26T00:00:000Z']]
-    </Select>
-  </Query>
-</QueryList>
-*/
+#[derive(Clone)]
+/// Comparison conditions supported by the Windows Event Log
+pub enum TimeComparison {
+    Equal,
+    GreaterThan,
+    LessThan,
+    GreaterThanOrEqual,
+    LessThanOrEqual,
+}
+
+impl std::fmt::Display for TimeComparison {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        match *self {
+            TimeComparison::Equal => write!(f, "="),
+            TimeComparison::GreaterThan => write!(f, "&gt;"),
+            TimeComparison::LessThan => write!(f, "&lt;"),
+            TimeComparison::GreaterThanOrEqual => write!(f, "&gt;="),
+            TimeComparison::LessThanOrEqual => write!(f, "&lt;="),
+        }
+    }
+}
+#[derive(Clone)]
+/// Comparison conditions supported by the Windows Event Log
+pub enum TimeDiff {
+    InLast,
+    InRange,
+}
+
+impl std::fmt::Display for TimeDiff {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        match *self {
+            TimeDiff::InLast => write!(f, "timediff(@SystemTime)"),
+            TimeDiff::InRange => write!(f, "@SystemTime"),
+        }
+    }
+}
