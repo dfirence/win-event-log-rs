@@ -6,6 +6,9 @@ pub mod data;
 pub mod event;
 pub mod level;
 pub mod provider;
+pub mod time;
+
+use time::Time;
 
 #[derive(Clone)]
 pub enum SystemFilter {
@@ -13,6 +16,7 @@ pub enum SystemFilter {
     EventID(event::Event),
     Level(level::Level),
     Provider(provider::Provider),
+    Time(time::Time)
 }
 
 #[derive(Clone)]
@@ -56,6 +60,10 @@ impl EventFilter {
     pub fn event_data<T: Into<String>>(name: T, value: T) -> EventFilter {
         EventFilter::EventData(EventDataFilter::new(name, value))
     }
+    pub fn time<T: Into<String>>(time: T) -> EventFilter
+    {
+        EventFilter::System(SystemFilter::Time(Time::new(time)))
+    }
 }
 
 impl fmt::Display for EventFilter {
@@ -74,6 +82,7 @@ impl fmt::Display for SystemFilter {
             SystemFilter::EventID(item) => write!(f, "{}", item),
             SystemFilter::Level(item) => write!(f, "{}", item),
             SystemFilter::Provider(item) => write!(f, "{}", item),
+            SystemFilter::Time(item) => write!(f, "{}", item),
         }
     }
 }
