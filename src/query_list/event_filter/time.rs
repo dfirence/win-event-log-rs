@@ -15,7 +15,7 @@ impl Time {
 impl fmt::Display for Time {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result
     {
-        let s = format!("TimeCreated[timediff(@SystemTime) &lt;= '{}'", self.interval);
+        let s = format!("*[System[TimeCreated[@SystemTime]  &lt;= '{}'", self.interval);
         write!(f, "{}", s)
         //write!(f, "*[System[TimeCreated[@SystemTime] &gt;= '{}']]", self.time)
     }
