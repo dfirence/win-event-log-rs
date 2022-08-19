@@ -15,11 +15,12 @@ impl Time {
 impl fmt::Display for Time {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result
     {
-        let s = format!("*[System[TimeCreated[@SystemTime]  &lt;= '{}'", self.interval);
+        let s = format!("[System[TimeCreated[timediff(@SystemTime) &lt;= '{}'", self.interval);
         write!(f, "{}", s)
         //write!(f, "*[System[TimeCreated[@SystemTime] &gt;= '{}']]", self.time)
     }
 }
+// ">*[System[TimeCreated[timediff(@SystemTime) &lt;= 3600000]]]</
 // https://docs.microsoft.com/en-us/previous-versions/bb671200(v=vs.90)
 /*
 "<QueryList>" & _
